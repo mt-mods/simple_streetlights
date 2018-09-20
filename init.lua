@@ -62,46 +62,58 @@ local function check_and_place(itemstack, placer, pointed_thing, pole, light)
 	minetest.set_node(pos4, { name = light, param2 = 0 })
 end
 
-minetest.register_tool("simple_streetlights:spawner_wood_white", {
-	description = "Streetlight spawner (wooden pole, white light)",
-	inventory_image = "simple_streetlights_spawner_wood_white.png",
+minetest.register_tool("simple_streetlights:spawner_wood_meselamp", {
+	description = "Streetlight spawner (wooden pole, Mese lamp cube)",
+	inventory_image = "simple_streetlights_spawner_wood_meselamp.png",
 	use_texture_alpha = true,
 	tool_capabilities = { full_punch_interval=0.1 },
 	on_place = function(itemstack, placer, pointed_thing)
-		check_and_place(itemstack, placer, pointed_thing, "default:fence_wood", "ilights:light")
+		check_and_place(itemstack, placer, pointed_thing, "default:fence_wood", "default:meselamp")
 	end
 })
 
-if minetest.get_modpath("gloopblocks") then
-	minetest.register_tool("simple_streetlights:spawner_steel_white", {
-		description = "Streetlight spawner (steel pole, white light)",
-		inventory_image = "simple_streetlights_spawner_steel_white.png",
+if minetest.get_modpath("ilights") then
+	minetest.register_tool("simple_streetlights:spawner_wood_white", {
+		description = "Streetlight spawner (wooden pole, white light)",
+		inventory_image = "simple_streetlights_spawner_wood_white.png",
 		use_texture_alpha = true,
 		tool_capabilities = { full_punch_interval=0.1 },
 		on_place = function(itemstack, placer, pointed_thing)
-			check_and_place(itemstack, placer, pointed_thing, "gloopblocks:fence_steel", "ilights:light")
-		end
-	})
-end
-
-if minetest.get_modpath("homedecor") then
-	minetest.register_tool("simple_streetlights:spawner_wrought_iron_white", {
-		description = "Streetlight spawner (wrought iron pole, white light)",
-		inventory_image = "simple_streetlights_spawner_wrought_iron_white.png",
-		use_texture_alpha = true,
-		tool_capabilities = { full_punch_interval=0.1 },
-		on_place = function(itemstack, placer, pointed_thing)
-			check_and_place(itemstack, placer, pointed_thing, "homedecor:fence_wrought_iron", "ilights:light")
+			check_and_place(itemstack, placer, pointed_thing, "default:fence_wood", "ilights:light")
 		end
 	})
 
-	minetest.register_tool("simple_streetlights:spawner_brass_white", {
-		description = "Streetlight spawner (brass pole, white light)",
-		inventory_image = "simple_streetlights_spawner_brass_white.png",
-		use_texture_alpha = true,
-		tool_capabilities = { full_punch_interval=0.1 },
-		on_place = function(itemstack, placer, pointed_thing)
-			check_and_place(itemstack, placer, pointed_thing, "homedecor:fence_brass", "ilights:light")
-		end
-	})
+	if minetest.get_modpath("gloopblocks") then
+		minetest.register_tool("simple_streetlights:spawner_steel_white", {
+			description = "Streetlight spawner (steel pole, white light)",
+			inventory_image = "simple_streetlights_spawner_steel_white.png",
+			use_texture_alpha = true,
+			tool_capabilities = { full_punch_interval=0.1 },
+			on_place = function(itemstack, placer, pointed_thing)
+				check_and_place(itemstack, placer, pointed_thing, "gloopblocks:fence_steel", "ilights:light")
+			end
+		})
+	end
+
+	if minetest.get_modpath("homedecor") then
+		minetest.register_tool("simple_streetlights:spawner_wrought_iron_white", {
+			description = "Streetlight spawner (wrought iron pole, white light)",
+			inventory_image = "simple_streetlights_spawner_wrought_iron_white.png",
+			use_texture_alpha = true,
+			tool_capabilities = { full_punch_interval=0.1 },
+			on_place = function(itemstack, placer, pointed_thing)
+				check_and_place(itemstack, placer, pointed_thing, "homedecor:fence_wrought_iron", "ilights:light")
+			end
+		})
+
+		minetest.register_tool("simple_streetlights:spawner_brass_white", {
+			description = "Streetlight spawner (brass pole, white light)",
+			inventory_image = "simple_streetlights_spawner_brass_white.png",
+			use_texture_alpha = true,
+			tool_capabilities = { full_punch_interval=0.1 },
+			on_place = function(itemstack, placer, pointed_thing)
+				check_and_place(itemstack, placer, pointed_thing, "homedecor:fence_brass", "ilights:light")
+			end
+		})
+	end
 end
