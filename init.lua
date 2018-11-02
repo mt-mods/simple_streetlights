@@ -5,8 +5,17 @@ local fdir_to_right = {
 	{  0,  1 }
 }
 
+minetest.register_privilege("streetlight", {
+	description = "Allows using streetlight spawners",
+	give_to_singleplayer = true
+})
+
 local function check_and_place(itemstack, placer, pointed_thing, pole, light)
 	if not placer then return end
+	if not minetest.check_player_privs(placer, "streetlight") then
+		minetest.chat_send_player(placer:get_player_name(), "*** You don't have permission to use a streetlight spawner.")
+		return
+	end
 	local player_name = placer:get_player_name()
 	local fdir = minetest.dir_to_facedir(placer:get_look_dir())
 
