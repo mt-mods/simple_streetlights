@@ -65,6 +65,7 @@ local function place(itemstack,player,pointed)
 	local pos = pointed.above
 	if minetest.is_protected(pos,name) and not minetest.check_player_privs(name,{protection_bypass = true}) then
 		minetest.record_protection_violation(pos,name)
+		return
 	end
 	local isDouble = string.sub(itemstack:get_name(),-6,-1) == "double"
 	if not takeMaterials(player, sneak, isDouble and doubleMaterials or singleMaterials) then return end
