@@ -12,6 +12,7 @@ minetest.register_privilege("streetlight", {
 })
 
 local function check_and_place(itemstack, placer, pointed_thing, pole, light, param2)
+	local sneak = placer:get_player_control().sneak
 	if not placer then return end
 	if not minetest.check_player_privs(placer, "streetlight") then
 		minetest.chat_send_player(placer:get_player_name(), "*** You don't have permission to use a streetlight spawner.")
@@ -57,9 +58,17 @@ local function check_and_place(itemstack, placer, pointed_thing, pole, light, pa
 	def4 = minetest.registered_items[node4.name]
 	if minetest.is_protected(pos4, player_name) or not (def3 and def4.buildable_to) then return end
 
+	if sneak and minetest.is_protected(pos1, player_name) then return end
+
 	if not creative or not creative.is_enabled_for(player_name) then
 		local inv = placer:get_inventory()
 		if not inv:contains_item("main", pole.." 5") or not inv:contains_item("main", light) then return end
+		if sneak and inv:contains_item("main", streetlights.concrete) then
+			inv:remove_item("main", streetlights.concrete)
+		else
+			return
+		end
+
 		inv:remove_item("main", pole.." 5")
 		inv:remove_item("main", light)
 	end
@@ -70,6 +79,9 @@ local function check_and_place(itemstack, placer, pointed_thing, pole, light, pa
 	end
 	minetest.set_node(pos3, { name = pole    })
 	minetest.set_node(pos4, { name = light, param2 = param2 })
+	if sneak then
+		minetest.set_node(pos1, { name = streetlights.concrete })
+	end
 end
 
 local poles_tab = {
