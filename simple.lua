@@ -113,6 +113,21 @@ for _, pole in ipairs(poles_tab) do
 						check_and_place(itemstack, placer, pointed_thing, matnode, lightnode, lightparam2)
 					end
 				})
+
+				minetest.register_craft({
+					output = "simple_streetlights:spawner_"..matname.."_"..lightname,
+					type = "shapeless",
+					recipe = {
+						matnode,
+						matnode,
+						matnode,
+						matnode,
+						matnode,
+						matnode,
+						lightnode
+					}
+				})
+
 			end
 		end
 	end
