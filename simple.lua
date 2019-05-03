@@ -105,7 +105,7 @@ if minetest.get_modpath("ilights") then
 		})
 	end
 
-	if minetest.get_modpath("homedecor") then
+	if minetest.get_modpath("homedecor_fences") then
 		minetest.register_tool("simple_streetlights:spawner_wrought_iron_white", {
 			description = "Streetlight spawner (wrought iron pole, white light)",
 			inventory_image = "simple_streetlights_spawner_wrought_iron_white.png",

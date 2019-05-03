@@ -2,5 +2,6 @@ default
 creative?
 ilights?
 gloopblocks?
-homedecor?
+homedecor_fences?
+homedecor_lighting?
 streetspoles?
