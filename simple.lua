@@ -11,7 +11,7 @@ minetest.register_privilege("streetlight", {
 	give_to_singleplayer = true
 })
 
-local function check_and_place(itemstack, placer, pointed_thing, pole, light)
+local function check_and_place(itemstack, placer, pointed_thing, pole, light, param2)
 	if not placer then return end
 	if not minetest.check_player_privs(placer, "streetlight") then
 		minetest.chat_send_player(placer:get_player_name(), "*** You don't have permission to use a streetlight spawner.")
@@ -69,61 +69,49 @@ local function check_and_place(itemstack, placer, pointed_thing, pole, light)
 		minetest.set_node(pos2, {name = pole })
 	end
 	minetest.set_node(pos3, { name = pole    })
-	minetest.set_node(pos4, { name = light, param2 = 0 })
+	minetest.set_node(pos4, { name = light, param2 = param2 })
 end
 
-minetest.register_tool("simple_streetlights:spawner_wood_meselamp", {
-	description = "Streetlight spawner (wooden pole, Mese lamp cube)",
-	inventory_image = "simple_streetlights_spawner_wood_meselamp.png",
-	use_texture_alpha = true,
-	tool_capabilities = { full_punch_interval=0.1 },
-	on_place = function(itemstack, placer, pointed_thing)
-		check_and_place(itemstack, placer, pointed_thing, "default:fence_wood", "default:meselamp")
-	end
-})
+local poles_tab = {
+--    material name,  mod name,           node name
+	{ "wood",         "default",          "default:fence_wood" },
+	{ "brass",        "homedecor_fences", "homedecor:fence_brass" },
+	{ "wrought_iron", "homedecor_fences", "homedecor:fence_wrought_iron" },
+	{ "steel",        "gloopblocks",      "gloopblocks:fence_steel" }
+}
 
-if minetest.get_modpath("ilights") then
-	minetest.register_tool("simple_streetlights:spawner_wood_white", {
-		description = "Streetlight spawner (wooden pole, white light)",
-		inventory_image = "simple_streetlights_spawner_wood_white.png",
-		use_texture_alpha = true,
-		tool_capabilities = { full_punch_interval=0.1 },
-		on_place = function(itemstack, placer, pointed_thing)
-			check_and_place(itemstack, placer, pointed_thing, "default:fence_wood", "ilights:light")
+local lights_tab = {
+--    light name, mod name,   node name,          optional param2
+	{ "meselamp", "default", "default:meselamp" },
+	{ "ilight",    "ilights", "ilights:light" }
+}
+
+for _, pole in ipairs(poles_tab) do
+	local matname = pole[1]
+	local matmod =  pole[2]
+	local matnode = pole[3]
+
+	if minetest.get_modpath(matmod) then
+
+		for _, light in ipairs(lights_tab) do
+			local lightname =   light[1]
+			local lightmod =    light[2]
+			local lightnode =   light[3]
+			local lightparam2 = light[4] or 0
+
+			if minetest.get_modpath(lightmod) then
+
+				minetest.register_tool("simple_streetlights:spawner_"..matname.."_"..lightname, {
+					description = "Streetlight spawner ("..matname.." pole, "..lightname..")",
+					inventory_image = "simple_streetlights_inv_pole_"..matname..".png"..
+					                  "^simple_streetlights_inv_light_source_"..lightname..".png",
+					use_texture_alpha = true,
+					tool_capabilities = { full_punch_interval=0.1 },
+					on_place = function(itemstack, placer, pointed_thing)
+						check_and_place(itemstack, placer, pointed_thing, matnode, lightnode, lightparam2)
+					end
+				})
+			end
 		end
-	})
-
-	if minetest.get_modpath("gloopblocks") then
-		minetest.register_tool("simple_streetlights:spawner_steel_white", {
-			description = "Streetlight spawner (steel pole, white light)",
-			inventory_image = "simple_streetlights_spawner_steel_white.png",
-			use_texture_alpha = true,
-			tool_capabilities = { full_punch_interval=0.1 },
-			on_place = function(itemstack, placer, pointed_thing)
-				check_and_place(itemstack, placer, pointed_thing, "gloopblocks:fence_steel", "ilights:light")
-			end
-		})
-	end
-
-	if minetest.get_modpath("homedecor_fences") then
-		minetest.register_tool("simple_streetlights:spawner_wrought_iron_white", {
-			description = "Streetlight spawner (wrought iron pole, white light)",
-			inventory_image = "simple_streetlights_spawner_wrought_iron_white.png",
-			use_texture_alpha = true,
-			tool_capabilities = { full_punch_interval=0.1 },
-			on_place = function(itemstack, placer, pointed_thing)
-				check_and_place(itemstack, placer, pointed_thing, "homedecor:fence_wrought_iron", "ilights:light")
-			end
-		})
-
-		minetest.register_tool("simple_streetlights:spawner_brass_white", {
-			description = "Streetlight spawner (brass pole, white light)",
-			inventory_image = "simple_streetlights_spawner_brass_white.png",
-			use_texture_alpha = true,
-			tool_capabilities = { full_punch_interval=0.1 },
-			on_place = function(itemstack, placer, pointed_thing)
-				check_and_place(itemstack, placer, pointed_thing, "homedecor:fence_brass", "ilights:light")
-			end
-		})
 	end
 end
