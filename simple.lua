@@ -75,15 +75,17 @@ end
 local poles_tab = {
 --    material name,  mod name,           node name
 	{ "wood",         "default",          "default:fence_wood" },
+	{ "junglewood",   "default",          "default:fence_junglewood" },
 	{ "brass",        "homedecor_fences", "homedecor:fence_brass" },
 	{ "wrought_iron", "homedecor_fences", "homedecor:fence_wrought_iron" },
 	{ "steel",        "gloopblocks",      "gloopblocks:fence_steel" }
 }
 
 local lights_tab = {
---    light name, mod name,   node name,          optional param2
-	{ "meselamp", "default", "default:meselamp" },
-	{ "ilight",    "ilights", "ilights:light" }
+--    light name,       mod name,             node name,                      optional param2
+	{ "meselamp",       "default",            "default:meselamp" },
+	{ "ilight",         "ilights",            "ilights:light" },
+	{ "glowlight_cube", "homedecor_lighting", "homedecor:glowlight_small_cube" }
 }
 
 for _, pole in ipairs(poles_tab) do
