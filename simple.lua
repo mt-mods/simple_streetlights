@@ -66,7 +66,7 @@ minetest.register_privilege("streetlight", {
 })
 
 local function check_and_place(itemstack, placer, pointed_thing, pole, light, param2, needs_digiline_wire)
-	local sneak = placer:get_player_control().sneak
+	local controls = placer:get_player_control()
 	if not placer then return end
 	local playername = placer:get_player_name()
 	if not minetest.check_player_privs(placer, "streetlight") then
@@ -111,9 +111,13 @@ local function check_and_place(itemstack, placer, pointed_thing, pole, light, pa
 	pos4 = { x = pos1.x+fdir_to_right[fdir+1][1], y = pos1.y+4, z = pos1.z+fdir_to_right[fdir+1][2] }
 	node4 = minetest.get_node(pos4)
 	def4 = minetest.registered_items[node4.name]
+
+	local pos0 = { x = pos1.x, y = pos1.y-1, z = pos1.z }
+
 	if minetest.is_protected(pos4, player_name) or not (def3 and def4.buildable_to) then return end
 
-	if sneak and minetest.is_protected(pos1, player_name) then return end
+	if controls.sneak and minetest.is_protected(pos1, player_name) then return end
+	if controls.aux1 and minetest.is_protected(pos0, player_name) then return end
 
 	if not creative.is_enabled_for(player_name) then
 		local inv = placer:get_inventory()
@@ -132,7 +136,7 @@ local function check_and_place(itemstack, placer, pointed_thing, pole, light, pa
 			return
 		end
 
-		if sneak then
+		if controls.sneak then
 			if not inv:contains_item("main", streetlights.concrete) then
 				minetest.chat_send_player(playername, "*** You don't have any concrete in your inventory!")
 				return
@@ -141,13 +145,29 @@ local function check_and_place(itemstack, placer, pointed_thing, pole, light, pa
 			end
 		end
 
+		if controls.aux1 and needs_digiline_wire then
+			if not inv:contains_item("main", streetlights.distributor) then
+				minetest.chat_send_player(playername, "*** You don't have any Digiline distributors in your inventory!")
+				return
+			else
+				inv:remove_item("main", streetlights.distributor)
+			end
+		end
+
 		inv:remove_item("main", pole.." 6")
 		inv:remove_item("main", light)
-		inv:remove_item("main", digiline_wire_node)
+
+		if needs_digiline_wire then
+			inv:remove_item("main", digiline_wire_node)
+		end
 
 	end
 
-	if sneak then
+	if controls.aux1 and needs_digiline_wire then
+		minetest.set_node(pos0, { name = streetlights.distributor })
+	end
+
+	if controls.sneak then
 		minetest.set_node(pos1, { name = streetlights.concrete })
 	end
 
