@@ -131,8 +131,8 @@ local function check_and_place(itemstack, placer, pointed_thing, pole, light, pa
 			return
 		end
 
-		if needs_digiline_wire and not inv:contains_item("main", digiline_wire_node) then
-			minetest.chat_send_player(playername, "*** You don't have any digiline wires in your inventory!")
+		if needs_digiline_wire and not inv:contains_item("main", digiline_wire_node.." 6") then
+			minetest.chat_send_player(playername, "*** You don't have enough Digiline wires in your inventory!")
 			return
 		end
 
@@ -158,7 +158,7 @@ local function check_and_place(itemstack, placer, pointed_thing, pole, light, pa
 		inv:remove_item("main", light)
 
 		if needs_digiline_wire then
-			inv:remove_item("main", digiline_wire_node)
+			inv:remove_item("main", digiline_wire_node.." 6")
 		end
 
 	end
