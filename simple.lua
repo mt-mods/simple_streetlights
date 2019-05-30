@@ -251,6 +251,15 @@ for _, pole in ipairs(poles_tab) do
 					}
 				}
 				minetest.register_node(":"..matnode.."_digilines", def)
+
+				minetest.register_craft({
+					output = matnode.."_digilines",
+					type = "shapeless",
+					recipe = {
+						matnode,
+						digiline_wire_node,
+					}
+				})
 			end
 
 			if minetest.get_modpath(lightmod) then
