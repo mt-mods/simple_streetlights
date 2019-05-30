@@ -171,11 +171,17 @@ local function check_and_place(itemstack, placer, pointed_thing, pole, light, pa
 		minetest.set_node(pos1, { name = streetlights.concrete })
 	end
 
+	local pole2 = pole
+	if needs_digiline_wire then
+		pole2 = pole.."_digilines"
+	end
+
 	for i = 1, 5 do
 		pos2 = {x=pos1.x, y = pos1.y+i, z=pos1.z}
-		minetest.set_node(pos2, {name = pole })
+		minetest.set_node(pos2, {name = pole2 })
 	end
-	minetest.set_node(pos3, { name = pole    })
+
+	minetest.set_node(pos3, { name = pole2 })
 	minetest.set_node(pos4, { name = light, param2 = param2 })
 
 	if needs_digiline_wire and ilights.player_channels[playername] then
@@ -283,7 +289,7 @@ for _, pole in ipairs(poles_tab) do
 						use_texture_alpha = true,
 						tool_capabilities = { full_punch_interval=0.1 },
 						on_place = function(itemstack, placer, pointed_thing)
-							check_and_place(itemstack, placer, pointed_thing, matnode.."_digilines", lightnode, lightparam2, true)
+							check_and_place(itemstack, placer, pointed_thing, matnode, lightnode, lightparam2, true)
 						end,
 						on_use = ilights.digiline_on_use
 					})
