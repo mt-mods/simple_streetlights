@@ -319,6 +319,15 @@ for _, pole in ipairs(poles_tab) do
 						}
 					})
 
+					minetest.register_craft({
+						output = "simple_streetlights:spawner_"..matname.."_"..lightname.."_digilines",
+						type = "shapeless",
+						recipe = {
+							"simple_streetlights:spawner_"..matname.."_"..lightname,
+							digiline_wire_node
+						}
+					})
+
 					if minetest.registered_items[streetlights.distributor] then
 						minetest.register_tool("simple_streetlights:spawner_"..matname.."_"..lightname.."_digilines_distributor", {
 							description = "Streetlight spawner ("..matname.." pole, with "..lightname..", digilines conducting pole, with distributor 2m below)",
@@ -350,6 +359,24 @@ for _, pole in ipairs(poles_tab) do
 							}
 						})
 
+						minetest.register_craft({
+							output = "simple_streetlights:spawner_"..matname.."_"..lightname.."_digilines_distributor",
+							type = "shapeless",
+							recipe = {
+								"simple_streetlights:spawner_"..matname.."_"..lightname,
+								digiline_wire_node,
+								streetlights.distributor
+							}
+						})
+
+						minetest.register_craft({
+							output = "simple_streetlights:spawner_"..matname.."_"..lightname.."_digilines_distributor",
+							type = "shapeless",
+							recipe = {
+								"simple_streetlights:spawner_"..matname.."_"..lightname.."_digilines",
+								streetlights.distributor
+							}
+						})
 					end
 				end
 			end
