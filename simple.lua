@@ -65,7 +65,7 @@ minetest.register_privilege("streetlight", {
 	give_to_singleplayer = true
 })
 
-local function check_and_place(itemstack, placer, pointed_thing, pole, light, param2, needs_digiline_wire)
+local function check_and_place(itemstack, placer, pointed_thing, pole, light, param2, needs_digiline_wire, needs_distributor)
 	local controls = placer:get_player_control()
 	if not placer then return end
 	local playername = placer:get_player_name()
@@ -117,7 +117,7 @@ local function check_and_place(itemstack, placer, pointed_thing, pole, light, pa
 	if minetest.is_protected(pos4, player_name) or not (def3 and def4.buildable_to) then return end
 
 	if controls.sneak and minetest.is_protected(pos1, player_name) then return end
-	if controls.aux1 and minetest.is_protected(pos0, player_name) then return end
+	if needs_distributor and minetest.is_protected(pos0, player_name) then return end
 
 	if not creative.is_enabled_for(player_name) then
 		local inv = placer:get_inventory()
@@ -145,7 +145,7 @@ local function check_and_place(itemstack, placer, pointed_thing, pole, light, pa
 			end
 		end
 
-		if controls.aux1 and needs_digiline_wire then
+		if needs_distributor and needs_digiline_wire then
 			if not inv:contains_item("main", streetlights.distributor) then
 				minetest.chat_send_player(playername, "*** You don't have any Digiline distributors in your inventory!")
 				return
@@ -163,7 +163,7 @@ local function check_and_place(itemstack, placer, pointed_thing, pole, light, pa
 
 	end
 
-	if controls.aux1 and needs_digiline_wire then
+	if needs_distributor and needs_digiline_wire then
 		minetest.set_node(pos0, { name = streetlights.distributor })
 	end
 
@@ -290,6 +290,7 @@ for _, pole in ipairs(poles_tab) do
 				})
 
 				if enable_digilines and minetest.registered_nodes[lightnode].digiline then
+
 					minetest.register_tool("simple_streetlights:spawner_"..matname.."_"..lightname.."_digilines", {
 						description = "Streetlight spawner ("..matname.." pole, with "..lightname..", digilines conducting pole)",
 						inventory_image = "simple_streetlights_inv_pole_"..matname..".png"..
@@ -317,6 +318,39 @@ for _, pole in ipairs(poles_tab) do
 							digiline_wire_node,
 						}
 					})
+
+					if minetest.registered_items[streetlights.distributor] then
+						minetest.register_tool("simple_streetlights:spawner_"..matname.."_"..lightname.."_digilines_distributor", {
+							description = "Streetlight spawner ("..matname.." pole, with "..lightname..", digilines conducting pole, with distributor 2m below)",
+							inventory_image = "simple_streetlights_inv_pole_"..matname..".png"..
+											  "^simple_streetlights_inv_pole_digiline_overlay.png"..
+											  "^simple_streetlights_inv_pole_distributor_overlay.png"..
+											  "^simple_streetlights_inv_light_source_"..lightname..".png",
+							use_texture_alpha = true,
+							tool_capabilities = { full_punch_interval=0.1 },
+							on_place = function(itemstack, placer, pointed_thing)
+								check_and_place(itemstack, placer, pointed_thing, matnode, lightnode, lightparam2, true, true)
+							end,
+							on_use = ilights.digiline_on_use
+						})
+
+						minetest.register_craft({
+							output = "simple_streetlights:spawner_"..matname.."_"..lightname.."_digilines_distributor",
+							type = "shapeless",
+							recipe = {
+								matnode,
+								matnode,
+								matnode,
+								matnode,
+								matnode,
+								matnode,
+								lightnode,
+								digiline_wire_node,
+								streetlights.distributor
+							}
+						})
+
+					end
 				end
 			end
 		end
