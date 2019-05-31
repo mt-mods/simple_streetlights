@@ -250,6 +250,9 @@ for _, pole in ipairs(poles_tab) do
 						{items = { matnode.."_digilines" } },
 					}
 				}
+				def.palette = nil                      -- if the coloredwood mod exists and loads first, it'll create these
+				def.groups.ud_param2_colorable = nil   -- settings, which we don't want in the cloned node.
+
 				minetest.register_node(":"..matnode.."_digilines", def)
 
 				minetest.register_craft({
