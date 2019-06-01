@@ -163,10 +163,6 @@ local function check_and_place(itemstack, placer, pointed_thing, pole, light, pa
 
 	end
 
-	if distributor_node and needs_digiline_wire then
-		minetest.set_node(pos0, { name = distributor_node })
-	end
-
 	if controls.sneak then
 		minetest.set_node(pos1, { name = streetlights.concrete })
 	end
@@ -187,6 +183,12 @@ local function check_and_place(itemstack, placer, pointed_thing, pole, light, pa
 	if needs_digiline_wire and ilights.player_channels[playername] then
 		minetest.get_meta(pos4):set_string("channel", ilights.player_channels[playername])
 	end
+
+	if distributor_node and needs_digiline_wire then
+		minetest.set_node(pos0, { name = distributor_node })
+		digilines.update_autoconnect(pos0)
+	end
+
 end
 
 local poles_tab = {
