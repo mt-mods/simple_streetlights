@@ -69,10 +69,7 @@ local function check_and_place(itemstack, placer, pointed_thing, pole, light, pa
 	local controls = placer:get_player_control()
 	if not placer then return end
 	local playername = placer:get_player_name()
-	if not minetest.check_player_privs(placer, "streetlight") then
-		minetest.chat_send_player(playername, "*** You don't have permission to use a streetlight spawner.")
-		return
-	end
+
 	local player_name = placer:get_player_name()
 	local fdir = minetest.dir_to_facedir(placer:get_look_dir())
 
@@ -81,14 +78,18 @@ local function check_and_place(itemstack, placer, pointed_thing, pole, light, pa
 	if not node1 or node1.name == "ignore" then return end
 	local def1 = minetest.registered_items[node1.name]
 
-	print(dump(pos1))
-	print(node1.name)
-	print(dump(def1))
-
-
 	if (def1 and def1.buildable_to) then
 		pos1.y = pos1.y-1
 	end
+
+	local rc = streetlights.rightclick_pointed_thing(pos1, placer, itemstack, pointed_thing)
+	if rc then return rc end
+
+	if not minetest.check_player_privs(placer, "streetlight") then
+		minetest.chat_send_player(playername, "*** You don't have permission to use a streetlight spawner.")
+		return
+	end
+
 	local node1 = minetest.get_node(pos1)
 
 	local node2, node3, node4
