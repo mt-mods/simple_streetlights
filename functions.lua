@@ -36,6 +36,8 @@ function streetlights.check_and_place(itemstack, placer, pointed_thing, def)
 	local pole                = def.pole
 	local light               = def.light
 	local param2              = def.param2
+	local height              = def.height or 5
+	local has_top             = (def.has_top ~= false)
 	local needs_digiline_wire = def.needs_digiline_wire
 	local distributor_node    = def.distributor_node
 
@@ -70,25 +72,26 @@ function streetlights.check_and_place(itemstack, placer, pointed_thing, def)
 	local def2, def3, def4
 
 	local pos2, pos3, pos4
-	for i = 1, 5 do
+	for i = 1, height do
 		pos2 = { x=pos1.x, y = pos1.y+i, z=pos1.z }
 		node2 = minetest.get_node(pos2)
 		def2 = minetest.registered_items[node2.name]
 		if minetest.is_protected(pos2, player_name) or not (def2 and def2.buildable_to) then return end
 	end
 
-	pos3 = { x = pos1.x+fdir_to_right[fdir+1][1], y = pos1.y+5, z = pos1.z+fdir_to_right[fdir+1][2] }
+	pos3 = { x = pos1.x+fdir_to_right[fdir+1][1], y = pos1.y+height, z = pos1.z+fdir_to_right[fdir+1][2] }
 	node3 = minetest.get_node(pos3)
 	def3 = minetest.registered_items[node3.name]
 	if minetest.is_protected(pos3, player_name) or not (def3 and def3.buildable_to) then return end
 
-	pos4 = { x = pos1.x+fdir_to_right[fdir+1][1], y = pos1.y+4, z = pos1.z+fdir_to_right[fdir+1][2] }
-	node4 = minetest.get_node(pos4)
-	def4 = minetest.registered_items[node4.name]
+	if has_top then
+		pos4 = { x = pos1.x+fdir_to_right[fdir+1][1], y = pos1.y+height-1, z = pos1.z+fdir_to_right[fdir+1][2] }
+		node4 = minetest.get_node(pos4)
+		def4 = minetest.registered_items[node4.name]
+		if minetest.is_protected(pos4, player_name) or not (def4 and def4.buildable_to) then return end
+	end
 
 	local pos0 = { x = pos1.x, y = pos1.y-1, z = pos1.z }
-
-	if minetest.is_protected(pos4, player_name) or not (def3 and def4.buildable_to) then return end
 
 	if controls.sneak and minetest.is_protected(pos1, player_name) then return end
 	if distributor_node and minetest.is_protected(pos0, player_name) then return end
@@ -146,13 +149,17 @@ function streetlights.check_and_place(itemstack, placer, pointed_thing, def)
 		pole2 = pole.."_digilines"
 	end
 
-	for i = 1, 5 do
+	for i = 1, height do
 		pos2 = {x=pos1.x, y = pos1.y+i, z=pos1.z}
 		minetest.set_node(pos2, {name = pole2 })
 	end
 
-	minetest.set_node(pos3, { name = pole2 })
-	minetest.set_node(pos4, { name = light, param2 = param2 })
+	if has_top then
+		minetest.set_node(pos3, { name = pole2 })
+		minetest.set_node(pos4, { name = light, param2 = param2 })
+	else
+		minetest.set_node(pos3, { name = light, param2 = param2 })
+	end
 
 	if needs_digiline_wire and ilights.player_channels[playername] then
 		minetest.get_meta(pos4):set_string("channel", ilights.player_channels[playername])
@@ -162,6 +169,7 @@ function streetlights.check_and_place(itemstack, placer, pointed_thing, def)
 		minetest.set_node(pos0, { name = distributor_node })
 		digilines.update_autoconnect(pos0)
 	end
+
 end
 
 minetest.register_privilege("streetlight", {

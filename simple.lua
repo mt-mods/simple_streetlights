@@ -30,10 +30,10 @@ end
 local digiline_wire_node = "digilines:wire_std_00000000"
 
 local poles_tab = {
---    material name,  mod name,           node name
+--    material name,  mod name,           node name,                        optional height, has top section
 	{ "wood",         "default",          "default:fence_wood" },
 	{ "junglewood",   "default",          "default:fence_junglewood" },
-	{ "brass",        "homedecor_fences", "homedecor:fence_brass" },
+	{ "brass",        "homedecor_fences", "homedecor:fence_brass"},
 	{ "wrought_iron", "homedecor_fences", "homedecor:fence_wrought_iron" },
 	{ "steel",        "gloopblocks",      "gloopblocks:fence_steel" }
 }
@@ -49,6 +49,8 @@ for _, pole in ipairs(poles_tab) do
 	local matname = pole[1]
 	local matmod =  pole[2]
 	local matnode = pole[3]
+	local height =  pole[4] or 5
+	local has_top = (pole[5] ~= false)
 
 	if minetest.get_modpath(matmod) then
 
@@ -117,7 +119,9 @@ for _, pole in ipairs(poles_tab) do
 						streetlights.check_and_place(itemstack, placer, pointed_thing, {
 							pole=matnode,
 							light=lightnode,
-							param2=lightparam2
+							param2=lightparam2,
+							has_top = has_top,
+							height = height
 						})
 					end
 				})
@@ -150,6 +154,8 @@ for _, pole in ipairs(poles_tab) do
 								pole=matnode,
 								light=lightnode,
 								param2=lightparam2,
+								has_top = has_top,
+								height = height,
 								needs_digiline_wire=true
 							})
 						end,
@@ -205,6 +211,8 @@ for _, pole in ipairs(poles_tab) do
 									pole=matnode,
 									light=lightnode,
 									param2=lightparam2,
+									has_top = has_top,
+									height = height,
 									needs_digiline_wire=true,
 									distributor_node=distributor
 								})
