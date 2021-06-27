@@ -31,7 +31,14 @@ function streetlights.rightclick_pointed_thing(pos, placer, itemstack, pointed_t
 	return def.on_rightclick(pos, node, placer, itemstack, pointed_thing) or itemstack
 end
 
-function streetlights.check_and_place(itemstack, placer, pointed_thing, pole, light, param2, needs_digiline_wire, distributor_node)
+function streetlights.check_and_place(itemstack, placer, pointed_thing, def)
+
+	local pole                = def.pole
+	local light               = def.light
+	local param2              = def.param2
+	local needs_digiline_wire = def.needs_digiline_wire
+	local distributor_node    = def.distributor_node
+
 	local controls = placer:get_player_control()
 	if not placer then return end
 	local playername = placer:get_player_name()

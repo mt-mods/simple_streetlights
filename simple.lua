@@ -114,7 +114,11 @@ for _, pole in ipairs(poles_tab) do
 					use_texture_alpha = true,
 					tool_capabilities = { full_punch_interval=0.1 },
 					on_place = function(itemstack, placer, pointed_thing)
-						streetlights.check_and_place(itemstack, placer, pointed_thing, matnode, lightnode, lightparam2)
+						streetlights.check_and_place(itemstack, placer, pointed_thing, {
+							pole=matnode,
+							light=lightnode,
+							param2=lightparam2
+						})
 					end
 				})
 
@@ -142,7 +146,12 @@ for _, pole in ipairs(poles_tab) do
 						use_texture_alpha = true,
 						tool_capabilities = { full_punch_interval=0.1 },
 						on_place = function(itemstack, placer, pointed_thing)
-							streetlights.check_and_place(itemstack, placer, pointed_thing, matnode, lightnode, lightparam2, true)
+							streetlights.check_and_place(itemstack, placer, pointed_thing, {
+								pole=matnode,
+								light=lightnode,
+								param2=lightparam2,
+								needs_digiline_wire=true
+							})
 						end,
 						on_use = ilights.digiline_on_use
 					})
@@ -192,7 +201,13 @@ for _, pole in ipairs(poles_tab) do
 							use_texture_alpha = true,
 							tool_capabilities = { full_punch_interval=0.1 },
 							on_place = function(itemstack, placer, pointed_thing)
-								streetlights.check_and_place(itemstack, placer, pointed_thing, matnode, lightnode, lightparam2, true, distributor)
+								streetlights.check_and_place(itemstack, placer, pointed_thing, {
+									pole=matnode,
+									light=lightnode,
+									param2=lightparam2,
+									needs_digiline_wire=true,
+									distributor_node=distributor
+								})
 							end,
 							on_use = ilights.digiline_on_use
 						})
