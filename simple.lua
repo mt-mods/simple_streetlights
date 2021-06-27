@@ -30,7 +30,7 @@ end
 local digiline_wire_node = "digilines:wire_std_00000000"
 
 local poles_tab = {
---    material name,  mod name,           node name,                        optional height, has top section
+--    material name,  mod name,           node name,                        optional base, optional height, has top section
 	{ "wood",         "default",          "default:fence_wood" },
 	{ "junglewood",   "default",          "default:fence_junglewood" },
 	{ "brass",        "homedecor_fences", "homedecor:fence_brass"},
@@ -46,11 +46,12 @@ local lights_tab = {
 }
 
 for _, pole in ipairs(poles_tab) do
-	local matname = pole[1]
-	local matmod =  pole[2]
-	local matnode = pole[3]
-	local height =  pole[4] or 5
-	local has_top = (pole[5] ~= false)
+	local matname  = pole[1]
+	local matmod   = pole[2]
+	local matnode  = pole[3]
+	local basenode = pole[4]
+	local height   = pole[5]
+	local has_top  = pole[6]
 
 	if minetest.get_modpath(matmod) then
 
@@ -117,6 +118,7 @@ for _, pole in ipairs(poles_tab) do
 					tool_capabilities = { full_punch_interval=0.1 },
 					on_place = function(itemstack, placer, pointed_thing)
 						streetlights.check_and_place(itemstack, placer, pointed_thing, {
+							base=basenode,
 							pole=matnode,
 							light=lightnode,
 							param2=lightparam2,
@@ -151,6 +153,7 @@ for _, pole in ipairs(poles_tab) do
 						tool_capabilities = { full_punch_interval=0.1 },
 						on_place = function(itemstack, placer, pointed_thing)
 							streetlights.check_and_place(itemstack, placer, pointed_thing, {
+								base=basenode,
 								pole=matnode,
 								light=lightnode,
 								param2=lightparam2,
@@ -208,6 +211,7 @@ for _, pole in ipairs(poles_tab) do
 							tool_capabilities = { full_punch_interval=0.1 },
 							on_place = function(itemstack, placer, pointed_thing)
 								streetlights.check_and_place(itemstack, placer, pointed_thing, {
+									base=basenode,
 									pole=matnode,
 									light=lightnode,
 									param2=lightparam2,

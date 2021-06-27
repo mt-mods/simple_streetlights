@@ -34,6 +34,7 @@ end
 function streetlights.check_and_place(itemstack, placer, pointed_thing, def)
 
 	local pole                = def.pole
+	local base                = def.base or def.pole
 	local light               = def.light
 	local param2              = def.param2
 	local height              = def.height or 5
@@ -149,7 +150,10 @@ function streetlights.check_and_place(itemstack, placer, pointed_thing, def)
 		pole2 = pole.."_digilines"
 	end
 
-	for i = 1, height do
+	local pos2b = {x=pos1.x, y = pos1.y+1, z=pos1.z}
+	minetest.set_node(pos2b, {name = base })
+
+	for i = 2, height do
 		pos2 = {x=pos1.x, y = pos1.y+i, z=pos1.z}
 		minetest.set_node(pos2, {name = pole2 })
 	end
