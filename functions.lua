@@ -38,9 +38,10 @@ function streetlights.check_and_place(itemstack, placer, pointed_thing, def)
 	local light               = def.light
 	local param2              = def.param2
 	local height              = def.height or 5
-	local has_top             = (def.has_top ~= false)
 	local needs_digiline_wire = def.needs_digiline_wire
 	local distributor_node    = def.distributor_node
+	local poletop             = (def.topnodes and (type(def.topnodes) == "table") and def.topnodes.poletop)  or pole
+	local overhang            = (def.topnodes and (type(def.topnodes) == "table") and def.topnodes.overhang) or pole
 
 	local controls = placer:get_player_control()
 	if not placer then return end
@@ -85,7 +86,7 @@ function streetlights.check_and_place(itemstack, placer, pointed_thing, def)
 	def3 = minetest.registered_items[node3.name]
 	if minetest.is_protected(pos3, player_name) or not (def3 and def3.buildable_to) then return end
 
-	if has_top then
+	if def.topnodes ~= false then
 		pos4 = { x = pos1.x+fdir_to_right[fdir+1][1], y = pos1.y+height-1, z = pos1.z+fdir_to_right[fdir+1][2] }
 		node4 = minetest.get_node(pos4)
 		def4 = minetest.registered_items[node4.name]
@@ -146,20 +147,27 @@ function streetlights.check_and_place(itemstack, placer, pointed_thing, def)
 	end
 
 	local pole2 = pole
+
 	if needs_digiline_wire then
+		base = base.."_digilines"
 		pole2 = pole.."_digilines"
+		poletop = poletop.."_digilines"
+		overhang = overhang.."_digilines"
 	end
 
 	local pos2b = {x=pos1.x, y = pos1.y+1, z=pos1.z}
 	minetest.set_node(pos2b, {name = base })
 
-	for i = 2, height do
+	for i = 2, height-1 do
 		pos2 = {x=pos1.x, y = pos1.y+i, z=pos1.z}
 		minetest.set_node(pos2, {name = pole2 })
 	end
 
-	if has_top then
-		minetest.set_node(pos3, { name = pole2 })
+	local pos2t = {x=pos1.x, y = pos1.y+height, z=pos1.z}
+	minetest.set_node(pos2t, {name = poletop })
+
+	if def.topnodes ~= false then
+		minetest.set_node(pos3, { name = overhang })
 		minetest.set_node(pos4, { name = light, param2 = param2 })
 	else
 		minetest.set_node(pos3, { name = light, param2 = param2 })
