@@ -5,6 +5,12 @@ local fdir_to_right = {
 	{  0,  1 }
 }
 
+local fdir_to_back = {
+	{  0, -1 },
+	{ -1,  0 },
+	{  0,  1 },
+	{  1,  0 }
+}
 --digilines compatibility
 
 local rules_alldir = {
@@ -36,19 +42,23 @@ function streetlights.check_and_place(itemstack, placer, pointed_thing, def)
 	local pole                = def.pole
 	local base                = def.base or def.pole
 	local light               = def.light
-	local param2              = def.param2
 	local height              = def.height or 5
 	local needs_digiline_wire = def.needs_digiline_wire
 	local distributor_node    = def.distributor_node
 	local poletop             = (def.topnodes and (type(def.topnodes) == "table") and def.topnodes.poletop)  or pole
 	local overhang            = (def.topnodes and (type(def.topnodes) == "table") and def.topnodes.overhang) or pole
+	local copy_pole_fdir      = def.copy_pole_fdir
+	local light_fdir          = def.light_fdir
 
 	local controls = placer:get_player_control()
 	if not placer then return end
 	local playername = placer:get_player_name()
 
 	local player_name = placer:get_player_name()
-	local fdir = minetest.dir_to_facedir(placer:get_look_dir())
+
+	local placer_pos = placer:get_pos() -- this bit borrowed from builtin/game/item.lua
+	local target_dir = vector.subtract(pointed_thing.above, placer_pos)
+	local fdir = minetest.dir_to_facedir(target_dir)
 
 	local pos1 = minetest.get_pointed_thing_position(pointed_thing)
 	local node1 = minetest.get_node(pos1)
@@ -155,22 +165,36 @@ function streetlights.check_and_place(itemstack, placer, pointed_thing, def)
 		overhang = overhang.."_digilines"
 	end
 
+	local target_fdir
+
+	if copy_pole_fdir == true then
+		if def.node_rotation then
+			target_fdir = minetest.dir_to_facedir(vector.rotate(target_dir, {x=0, y=def.node_rotation, z=0}))
+		else
+			target_fdir = fdir
+		end
+
+		if def.light_fdir == "auto" then -- the light should use the same fdir as the pole
+			light_fdir = target_fdir
+		end
+	end
+
 	local pos2b = {x=pos1.x, y = pos1.y+1, z=pos1.z}
-	minetest.set_node(pos2b, {name = base })
+	minetest.set_node(pos2b, {name = base, param2 = target_fdir })
 
 	for i = 2, height-1 do
 		pos2 = {x=pos1.x, y = pos1.y+i, z=pos1.z}
-		minetest.set_node(pos2, {name = pole2 })
+		minetest.set_node(pos2, {name = pole2, param2 = target_fdir })
 	end
 
 	local pos2t = {x=pos1.x, y = pos1.y+height, z=pos1.z}
-	minetest.set_node(pos2t, {name = poletop })
+	minetest.set_node(pos2t, {name = poletop, param2 = target_fdir  })
 
 	if def.topnodes ~= false then
 		minetest.set_node(pos3, { name = overhang })
-		minetest.set_node(pos4, { name = light, param2 = param2 })
+		minetest.set_node(pos4, { name = light, param2 = light_fdir })
 	else
-		minetest.set_node(pos3, { name = light, param2 = param2 })
+		minetest.set_node(pos3, { name = light, param2 = light_fdir })
 	end
 
 	if needs_digiline_wire and ilights.player_channels[playername] then

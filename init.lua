@@ -11,6 +11,11 @@ streetlights.vert_digiline = "digistuff:vertical_bottom"
 dofile(modpath.."/functions.lua")
 dofile(modpath.."/simple.lua")
 
-if minetest.get_modpath("homedecor_lighting") and minetest.get_modpath("streetspoles") then
-	dofile(modpath.."/minedot.lua")
+if minetest.get_modpath("streetspoles") then
+	if minetest.get_modpath("homedecor_lighting") then
+		dofile(modpath.."/minedot.lua")
+	end
+	if minetest.get_modpath("morelights_modern") then
+		dofile(modpath.."/modern.lua")
+	end
 end
