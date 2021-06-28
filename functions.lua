@@ -52,8 +52,6 @@ function streetlights.check_and_place(itemstack, placer, pointed_thing, def)
 
 	local controls = placer:get_player_control()
 	if not placer then return end
-	local playername = placer:get_player_name()
-
 	local player_name = placer:get_player_name()
 
 	local placer_pos = placer:get_pos() -- this bit borrowed from builtin/game/item.lua
@@ -73,7 +71,7 @@ function streetlights.check_and_place(itemstack, placer, pointed_thing, def)
 	if rc then return rc end
 
 	if not minetest.check_player_privs(placer, "streetlight") then
-		minetest.chat_send_player(playername, "*** You don't have permission to use a streetlight spawner.")
+		minetest.chat_send_player(player_name, "*** You don't have permission to use a streetlight spawner.")
 		return
 	end
 
@@ -110,47 +108,114 @@ function streetlights.check_and_place(itemstack, placer, pointed_thing, def)
 
 	if not creative.is_enabled_for(player_name) then
 		local inv = placer:get_inventory()
-		if not inv:contains_item("main", pole.." 6") then
-			minetest.chat_send_player(playername, "*** You don't have enough "..pole.." in your inventory!")
-			return
+
+		-- first, make sure the player has items in the inventory to build with
+
+		-- if main_extends_base, then the base node is one of two pieces
+		-- and the upper piece is not usually directly available to the player,
+		-- as with streets:pole_[top|bottom] (the thin one)
+		--
+		-- if it's that sort of thing, there could be some waste here when the player digs a pole,
+		-- if you use an odd number for the pole height along with main_extends_base
+
+		local num_main = height + 1
+
+		if poletop ~= pole and not def.main_extends_base then
+			num_main = num_main - 1
+			if not inv:contains_item("main", poletop) then
+				minetest.chat_send_player(player_name, "*** You don't have any "..poletop.." in your inventory!")
+				return
+			end
+		end
+
+		if overhang ~= pole and not def.main_extends_base then
+			num_main = num_main - 1
+			if not inv:contains_item("main", overhang) then
+				minetest.chat_send_player(player_name, "*** You don't have any "..overhang.." in your inventory!")
+				return
+			end
+		end
+
+		if base ~= pole then
+			num_main = num_main - 1
+			if def.main_extends_base then
+				if not inv:contains_item("main", base.." "..math.floor(num_main/2)) then
+					minetest.chat_send_player(player_name, "*** You don't have enough "..base.." in your inventory!")
+					return
+				end
+			else
+				if not inv:contains_item("main", base) then
+					minetest.chat_send_player(player_name, "*** You don't have any "..base.." in your inventory!")
+					return
+				end
+
+				if not inv:contains_item("main", pole.." "..num_main) then
+					minetest.chat_send_player(player_name, "*** You don't have enough "..pole.." in your inventory!")
+					return
+				end
+			end
+		else
+			if not inv:contains_item("main", pole.." "..num_main) then
+				minetest.chat_send_player(player_name, "*** You don't have enough "..pole.." in your inventory!")
+				return
+			end
 		end
 
 		if not inv:contains_item("main", light) then
-			minetest.chat_send_player(playername, "*** You don't have any "..light.." in your inventory!")
+			minetest.chat_send_player(player_name, "*** You don't have any "..light.." in your inventory!")
 			return
 		end
 
-		if needs_digiline_wire and not inv:contains_item("main", digiline_wire_node.." 6") then
-			minetest.chat_send_player(playername, "*** You don't have enough Digiline wires in your inventory!")
+		if needs_digiline_wire and not inv:contains_item("main", digiline_wire_node.." "..height + (has_top and 1 or 0)) then
+			minetest.chat_send_player(player_name, "*** You don't have enough Digiline wires in your inventory!")
 			return
-		end
-
-		if controls.sneak then
-			if not inv:contains_item("main", streetlights.concrete) then
-				minetest.chat_send_player(playername, "*** You don't have any concrete in your inventory!")
-				return
-			else
-				inv:remove_item("main", streetlights.concrete)
-			end
 		end
 
 		if distributor_node and needs_digiline_wire then
 			if not inv:contains_item("main", distributor_node) then
-				minetest.chat_send_player(playername, "*** You don't have any "..distributor_node.." in your inventory!")
+				minetest.chat_send_player(player_name, "*** You don't have any "..distributor_node.." in your inventory!")
 				return
 			else
 				inv:remove_item("main", distributor_node)
 			end
 		end
 
-		inv:remove_item("main", pole.." 6")
+		if controls.sneak then
+			if not inv:contains_item("main", streetlights.concrete) then
+				minetest.chat_send_player(player_name, "*** You don't have any concrete in your inventory!")
+				return
+			else
+				inv:remove_item("main", streetlights.concrete)
+			end
+		end
+
+		-- If we got this far, the player has everything, so now deduct items
+
+		if poletop ~= pole and not def.main_extends_base then
+			inv:remove_item("main", poletop)
+		end
+
+		if overhang ~= pole and not def.main_extends_base then
+			inv:remove_item("main", overhang)
+		end
+
+		if base ~= pole then
+			if def.main_extends_base then
+				inv:remove_item("main", base.." "..math.floor(num_main/2))
+			end
+		else
+			inv:remove_item("main", pole.." "..num_main)
+		end
+
 		inv:remove_item("main", light)
 
 		if needs_digiline_wire then
-			inv:remove_item("main", digiline_wire_node.." 6")
+			inv:remove_item("main", digiline_wire_node.." "..num_main)
 		end
 
 	end
+
+	-- and place them in the world
 
 	if controls.sneak then
 		minetest.set_node(pos1, { name = streetlights.concrete })
@@ -197,8 +262,8 @@ function streetlights.check_and_place(itemstack, placer, pointed_thing, def)
 		minetest.set_node(pos3, { name = light, param2 = light_fdir })
 	end
 
-	if needs_digiline_wire and ilights.player_channels[playername] then
-		minetest.get_meta(pos4):set_string("channel", ilights.player_channels[playername])
+	if needs_digiline_wire and ilights.player_channels[player_name] then
+		minetest.get_meta(pos4):set_string("channel", ilights.player_channels[player_name])
 	end
 
 	if distributor_node and needs_digiline_wire then

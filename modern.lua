@@ -15,6 +15,7 @@ minetest.register_tool("simple_streetlights:spawner_modern_walllamp", {
 			copy_pole_fdir = true,
 			node_rotation = math.pi/2, -- 90° CCW
 			light_fdir = "auto",
+			main_extends_base = true
 		})
 	end
 })
