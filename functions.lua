@@ -11,6 +11,17 @@ local fdir_to_back = {
 	{  0,  1 },
 	{  1,  0 }
 }
+
+-- rotate around Y in order by fdir(+1)
+-- x+xo, x+zo, z+xo, z+zo, CW degrees
+
+local rot_y = {
+	{  1,  0,  0,  1,   0 }, -- N
+	{  0,  1, -1,  0,  90 }, -- E
+	{ -1,  0,  0, -1, 180 }, -- S
+	{  0, -1,  1,  0, 270 }, -- W
+}
+
 --digilines compatibility
 
 local rules_alldir = {
@@ -37,46 +48,93 @@ function streetlights.rightclick_pointed_thing(pos, placer, itemstack, pointed_t
 	return def.on_rightclick(pos, node, placer, itemstack, pointed_thing) or itemstack
 end
 
-local function can_build(target_pos, fdir, model_def, player_name, controls)
-	local main_node, node3, node4
-	local main_def, def3, def4
-
-	local main_pos, pos3, pos4
-	for i = 1, model_def.height do
-		main_pos = { x=target_pos.x, y = target_pos.y+i, z=target_pos.z }
-		main_node = minetest.get_node(main_pos)
-		main_def = minetest.registered_items[main_node.name]
-		if minetest.is_protected(main_pos, player_name) or not (main_def and main_def.buildable_to) then return end
-	end
-
-	pos3 = {
-		x = target_pos.x+fdir_to_right[fdir+1][1],
-		y = target_pos.y+model_def.height,
-		z = target_pos.z+fdir_to_right[fdir+1][2]
-	}
-	node3 = minetest.get_node(pos3)
-	def3 = minetest.registered_items[node3.name]
-	if minetest.is_protected(pos3, player_name) or not (def3 and def3.buildable_to) then return end
-
-	if def.topnodes ~= false then
-		pos4 = {
-			x = target_pos.x+fdir_to_right[fdir+1][1],
-			y = target_pos.y+model_def.height-1,
-			z = target_pos.z+fdir_to_right[fdir+1][2]
-		}
-		node4 = minetest.get_node(pos4)
-		def4 = minetest.registered_items[node4.name]
-		if minetest.is_protected(pos4, player_name) or not (def4 and def4.buildable_to) then return end
-	end
-
-	local dist_pos = { x = target_pos.x, y = target_pos.y-1, z = target_pos.z }
-
-	if controls.sneak and minetest.is_protected(target_pos, player_name) then return end
-	if model_def.distributor_node and minetest.is_protected(dist_pos, player_name) then return end
-	return true
+local function rotate_offset_around_y(origin, offs, fdir)
+	local ox = offs.x
+	local oz = offs.z
+	local rx = rot_y[fdir+1][1] * ox + rot_y[fdir+1][2] * oz
+	local rz = rot_y[fdir+1][3] * ox + rot_y[fdir+1][4] * oz
+	return {x = origin.x + rx, y = origin.y, z = origin.z + rz}
 end
 
-local function has_materials(model_def, inv, player_name, controls)
+
+local function can_build(target_pos, fdir, model_def, player_name, controls)
+
+	if model_def.protection_box then
+
+		local base_pos = {x=target_pos.x, y=target_pos.y+1, z=target_pos.z}
+
+		local r1 = rotate_offset_around_y(base_pos, model_def.protection_box.omin, fdir)
+		local r2 = rotate_offset_around_y(base_pos, model_def.protection_box.omax, fdir)
+
+		local minp = {x=r1.x, y=r1.y + model_def.protection_box.omin.y, z=r1.z}
+		local maxp = {x=r2.x, y=r2.y + model_def.protection_box.omax.y, z=r2.z}
+
+		return not minetest.is_area_protected(minp, maxp, player_name, 1)
+	else
+		local main_node, node3, node4
+		local main_def, def3, def4
+
+		local main_pos, pos3, pos4
+		for i = 1, model_def.height do
+			main_pos = { x=target_pos.x, y = target_pos.y+i, z=target_pos.z }
+			main_node = minetest.get_node(main_pos)
+			main_def = minetest.registered_items[main_node.name]
+			if minetest.is_protected(main_pos, player_name) or not (main_def and main_def.buildable_to) then return end
+		end
+
+		pos3 = {
+			x = target_pos.x+fdir_to_right[fdir+1][1],
+			y = target_pos.y+model_def.height,
+			z = target_pos.z+fdir_to_right[fdir+1][2]
+		}
+		node3 = minetest.get_node(pos3)
+		def3 = minetest.registered_items[node3.name]
+		if minetest.is_protected(pos3, player_name) or not (def3 and def3.buildable_to) then return end
+
+		if model_def.topnodes ~= false then
+			pos4 = {
+				x = target_pos.x+fdir_to_right[fdir+1][1],
+				y = target_pos.y+model_def.height-1,
+				z = target_pos.z+fdir_to_right[fdir+1][2]
+			}
+			node4 = minetest.get_node(pos4)
+			def4 = minetest.registered_items[node4.name]
+			if minetest.is_protected(pos4, player_name) or not (def4 and def4.buildable_to) then return end
+		end
+
+		local dist_pos = { x = target_pos.x, y = target_pos.y-1, z = target_pos.z }
+
+		if controls.sneak and minetest.is_protected(target_pos, player_name) then return end
+		if model_def.distributor_node and minetest.is_protected(dist_pos, player_name) then return end
+		return true
+	end
+end
+
+local function deduct_materials_schematic(model_def, inv, player_name, controls)
+	for _,mat in ipairs(model_def.materials) do
+		if not inv:contains_item("main", mat) then
+			local matname = string.sub(mat, 1, string.find(mat, " "))
+			minetest.chat_send_player(player_name, "*** You don't have enough "..matname.." in your inventory!")
+			return
+		end
+	end
+
+	if controls.sneak then
+		if not inv:contains_item("main", streetlights.concrete) then
+			minetest.chat_send_player(player_name, "*** You don't have any concrete in your inventory!")
+			return
+		else
+			inv:remove_item("main", streetlights.concrete)
+		end
+	end
+
+	for _,mat in ipairs(model_def.materials) do
+		inv:remove_item("main", mat)
+	end
+
+end
+
+local function deduct_materials_non_schematic(model_def, inv, player_name, controls)
 	-- if main_extends_base, then the base node is one of two pieces
 	-- and the upper piece is not usually directly available to the player,
 	-- as with streets:pole_[top|bottom] (the thin one)
@@ -154,10 +212,10 @@ local function has_materials(model_def, inv, player_name, controls)
 			inv:remove_item("main", streetlights.concrete)
 		end
 	end
-	return num_main
-end
 
-local function take_materials(model_def, inv, num_main, controls)
+	-- if we made it this far, then the player has everything needed
+	-- so deduct as appropriate
+
 	if model_def.poletop ~= model_def.pole and not model_def.main_extends_base then
 		inv:remove_item("main", model_def.poletop)
 	end
@@ -187,7 +245,6 @@ local function take_materials(model_def, inv, num_main, controls)
 	if controls.sneak then
 		inv:remove_item("main", streetlights.concrete)
 	end
-
 end
 
 local function build_streetlight(target_pos, target_node, target_dir, fdir, model_def, controls)
@@ -227,8 +284,6 @@ local function build_streetlight(target_pos, target_node, target_dir, fdir, mode
 
 	local top_pos = {x=target_pos.x, y = target_pos.y+model_def.height, z=target_pos.z}
 	minetest.set_node(top_pos, {name = model_def.poletop, param2 = target_fdir  })
-
-
 
 	local pos2, pos3, pos4
 
@@ -307,14 +362,28 @@ function streetlights.check_and_place(itemstack, placer, pointed_thing, model_de
 	if not creative.is_enabled_for(player_name) then
 		local inv = placer:get_inventory()
 
-		if has_materials(model_def, inv, player_name, controls) then
-			take_materials(model_def, inv, num_main, controls)
+		if model_def.materials then
+			deduct_materials_schematic(model_def, inv, player_name, controls)
 		else
-			return
+			deduct_materials_non_schematic(model_def, inv, player_name, controls)
 		end
 	end
 
-	build_streetlight(target_pos, target_node, target_dir, fdir, model_def, controls)
+	if model_def.schematic then
+
+		local base_pos = {x=target_pos.x, y=target_pos.y+1, z=target_pos.z}
+
+--		local offs = {
+--			x = model_def.placement_offsets.x,
+--			z = model_def.placement_offsets.z
+--		}
+
+--		local place_pos = rotate_offset_around_y(base_pos, offs, fdir)
+
+		minetest.place_schematic(base_pos, model_def.schematic, rot_y[fdir+1][5], nil, false, {place_center_x=true, place_center_z=true})
+	else
+		build_streetlight(target_pos, target_node, target_dir, fdir, model_def, controls)
+	end
 
 end
 
