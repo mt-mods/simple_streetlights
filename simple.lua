@@ -65,6 +65,8 @@ for _, pole in ipairs(poles_tab) do
 				local def = table.copy(minetest.registered_nodes[matnode])
 				local dl_overlay
 
+				def.is_ground_content = false
+
 				if def.drawtype == "fencelike" then
 					dl_overlay = "simple_streetlights_pole_digiline_overlay_fl.png"
 				else
