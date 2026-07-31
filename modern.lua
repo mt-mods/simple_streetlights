@@ -20,8 +20,6 @@ core.register_tool("simple_streetlights:spawner_modern_walllamp", {
 	end,
 })
 
-local homedecor_modpath = core.get_modpath("homedecor_fences")
-
 for k, v in pairs({ 1, 2, 4 }) do
 	streetlights.schematics[k] =
 		core.register_schematic(string.format("schems%sstreetlight_parking_lot_" .. v .. ".mts", DIR_DELIM))

@@ -5,13 +5,6 @@ local fdir_to_right = {
 	{ 0, 1 },
 }
 
-local fdir_to_back = {
-	{ 0, -1 },
-	{ -1, 0 },
-	{ 0, 1 },
-	{ 1, 0 },
-}
-
 -- rotate around Y in order by fdir(+1)
 -- x+xo, x+zo, z+xo, z+zo, CW degrees
 
@@ -22,23 +15,7 @@ local rot_y = {
 	{ 0, -1, 1, 0, 270 }, -- W
 }
 
---digilines compatibility
-
-local rules_alldir = {
-	{ x = 0, y = 0, z = -1 }, -- borrowed from lightstones
-	{ x = 1, y = 0, z = 0 },
-	{ x = -1, y = 0, z = 0 },
-	{ x = 0, y = 0, z = 1 },
-	{ x = 1, y = 1, z = 0 },
-	{ x = 1, y = -1, z = 0 },
-	{ x = -1, y = 1, z = 0 },
-	{ x = -1, y = -1, z = 0 },
-	{ x = 0, y = 1, z = 1 },
-	{ x = 0, y = -1, z = 1 },
-	{ x = 0, y = 1, z = -1 },
-	{ x = 0, y = -1, z = -1 },
-	{ x = 0, y = -1, z = 0 },
-}
+-- digilines compatibility
 
 function streetlights.rightclick_pointed_thing(pos, placer, itemstack, pointed_thing)
 	local node = core.get_node_or_nil(pos)
@@ -309,7 +286,7 @@ local function build_streetlight(target_pos, target_node, target_dir, fdir, mode
 	local top_pos = { x = target_pos.x, y = target_pos.y + model_def.height, z = target_pos.z }
 	core.set_node(top_pos, { name = model_def.poletop, param2 = target_fdir })
 
-	local pos2, pos3, pos4
+	local pos3, pos4
 
 	pos3 = {
 		x = target_pos.x + fdir_to_right[fdir + 1][1],
